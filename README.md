@@ -17,6 +17,47 @@ root@ubuntu-s-2vcpu-4gb-amd-fra1-01:~# curl -X GET "http://localhost:1026/versio
   "doc" : "https://fiware-orion.rtfd.io/en/4.1.0/"
 }
 }
+root@ubuntu-s-2vcpu-4gb-amd-fra1-01:~# cat device_registration.json 
+{
+  "devices": [
+    {
+      "device_id": "device-002",
+      "device_name": "esp32",
+      "entity_name": "device-002",
+      "entity_type": "TemperatureSensor",
+      "protocol": "MQTT",
+      "protocol_version": "v1",
+      "attributes": [
+        {
+          "object_id": "temperature",
+          "name": "temperature",
+          "type": "float"
+        },
+        {
+          "object_id": "humidity",
+          "name": "humidity",
+          "type": "float"
+        },
+        {
+          "object_id": "flame",
+          "name": "flame",
+          "type": "int"
+        },
+        {
+          "object_id": "sound",
+          "name": "sound",
+          "type": "int"
+        },
+        {
+          "object_id": "battery",
+          "name": "battery",
+          "type": "float"
+        }
+      ],
+      "apiKey": "987654321k"
+    }
+  ]
+}
 root@ubuntu-s-2vcpu-4gb-amd-fra1-01:~#  curl -X POST   -H "Content-Type: application/json"   -H "Fiware-Service: howtoService"   -H "Fiware-ServicePath: /howto"   -d @device_registration.json   http://localhost:4061/iot/devices
 
 root@ubuntu-s-2vcpu-4gb-amd-fra1-01:~# curl -X GET   http://localhost:4061/iot/devices   -H "Fiware-Service: howtoService"   -H "Fiware-ServicePath: /howto"
