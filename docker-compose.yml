@@ -1,130 +1,93 @@
-  GNU nano 6.2                                                                                                                                                                                                                          docker-compose.yml                                                                                                                                                                                                                                   
+  GNU nano 6.2                                                                                                                                                                                                                                                                                                                                                                                                                                                                         docker-compose.yml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 version: "3.8"
 services:
   mongo-db:
     image: mongo:4.4
-    command: mongod --bind_ip_all
+    container_name: mongo-db
     ports:
       - "27017:27017"
-    restart: always
+    command: mongod --bind_ip_all
+    volumes:
+      - mongo-data:/data/db
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: ["CMD", "mongo", "--eval", "print('waited for connection')"]
+      interval: 30s
+      retries: 5
+      start_period: 30s
+      timeout: 30s
+    networks:
+      - fiware-network
 
-  orion:
-    image: fiware/orion
-    hostname: orion
+  fiware-orion:
+    image: fiware/orion:3.11.0
+    container_name: fiware-orion
     depends_on:
-      mongo-db:
-        condition: service_healthy
+      - mongo-db
     ports:
       - "1026:1026"
-    command: -dbURI mongodb://mongo-db:27017/orion -logLevel DEBUG
-    restart: always
+    command: -dbhost mongo-db
+    networks:
+      - fiware-network
 
-  iot-agent-ul:
-    image: telefonicaiot/iotagent-ul
-    hostname: iot-agent-ul
-    container_name: fiware-iot-agent-ul
+  iot-agent:
+    image: fiware/iotagent-json
+    container_name: fiware-iot-agent
     depends_on:
       - mongo-db
-      - mosquitto
-    environment:
-      - IOTA_CB_HOST=orion
-      - IOTA_CB_PORT=1026
-      - IOTA_NORTH_PORT=4061
-      - IOTA_REGISTRY_TYPE=mongodb
-      - IOTA_MONGO_HOST=mongo-db
-      - IOTA_MONGO_PORT=27017
-      - IOTA_MONGO_DB=iotagent-ul
-      - IOTA_HTTP_PORT=7896
-      - IOTA_PROVIDER_URL=http://165.232.124.98:4061  
+      - fiware-orion
     ports:
       - "4041:4041"
-      - "7896:7896"  # North traffic port
-      - "4061:4061"  # South traffic port
-    restart: always
-
-  cygnus:
-    image: fiware/cygnus-ngsi
-    depends_on:
-      - mongo-db
-      - mysql-db
+      - "7896:7896"
     environment:
-      - CYGNUS_MYSQL_HOST=mysql-db
-      - CYGNUS_MYSQL_USER=root
-      - CYGNUS_MYSQL_PASS=password
-    ports:
-      - "5050:5050"
-    restart: always
+      - IOTA_CB_HOST=fiware-orion
+      - IOTA_CB_PORT=1026
+      - IOTA_NORTH_PORT=4041
+      - IOTA_REGISTRY_TYPE=mongodb
+      - IOTA_MONGO_HOST=mongo-db
+      - IOTA_TIMESTAMP=true
+      - IOTA_DEFAULT_RESOURCE=/iot/json
+      - IOTA_LOG_LEVEL=DEBUG
+    networks:
+      - fiware-network
 
-  mysql-db:
-    image: mysql:5.7
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=fiware
+  crate-db:
+    image: crate:latest
+    container_name: crate-db
     ports:
-      - "3306:3306"
-    restart: always
+      - "4200:4200"
+      - "5432:5432"
+    command: crate -Cauth.host_based.enabled=false -Ccluster.name=crate-cluster
+    networks:
+      - fiware-network
 
-  mosquitto:
-    image: eclipse-mosquitto
-    container_name: mosquitto
-    ports:
-      - "1883:1883"
-      - "9001:9001"
-    restart: always
-
-  # Prometheus Service
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    ports:
-      - "9090:9090"  # Exposing Prometheus web UI on port 9090
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Mount Prometheus config file
-    restart: always
+  quantumleap:
+    image: orchestracities/quantumleap
+    container_name: quantumleap
     depends_on:
-      - mongo-db
-      - orion
-      - iot-agent-ul
-      - mosquitto
+      - crate-db
+      - fiware-orion
+    ports:
+      - "8668:8668"
+    environment:
+      - CRATE_HOST=crate-db
+    networks:
+      - fiware-network
 
-  # Grafana Service
   grafana:
     image: grafana/grafana
     container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin  # Set admin password
     ports:
-      - "3000:3000"  # Exposing Grafana web UI on port 3000
-    restart: always
-    depends_on:
-      - prometheus
+      - "3000:3000"
     volumes:
-      - grafana-storage:/var/lib/grafana  # Persistent data storage for Grafana
+      - grafana-data:/var/lib/grafana
+    networks:
+      - fiware-network
 
 volumes:
-  mongodb: ~
-  grafana-storage: ~
+  grafana-data:
+  mongo-data:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+networks:
+  fiware-network:
+    driver: bridge
 
