@@ -1,0 +1,484 @@
+{
+	"info": {
+		"_postman_id": "efa405ef-35ec-4e15-a263-cd66852cdcba",
+		"name": "SmartSDK",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "44300681"
+	},
+	"item": [
+		{
+			"name": "eSP32",
+			"item": [
+				{
+					"name": "delete device",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://165.232.124.98:4041/iot/devices/esp32-monitoring-1",
+						"description": "Generated from cURL: curl -i -X DELETE \\\r\n  'http://165.232.124.98:4041/iot/devices/esp32-temperature-sensor' \\\r\n  -H 'Fiware-Service: myService' \\\r\n  -H 'Fiware-ServicePath: /newEnvironment'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "delte entety",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://165.232.124.98:1026/v2/entities/EnvironmentMonitor:esp32-monitoring-1",
+						"description": "Generated from cURL: curl -i -X DELETE \\\r\n  'http://165.232.124.98:1026/v2/entities/Device:esp32-temperature-sensor' \\\r\n  -H 'Fiware-Service: myService' \\\r\n  -H 'Fiware-ServicePath: /newEnvironment'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "delite service",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": {
+							"raw": "http://{{IP}}:4041/iot/services?resource=/iot/json&apikey=987654321",
+							"protocol": "http",
+							"host": [
+								"{{IP}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"services"
+							],
+							"query": [
+								{
+									"key": "resource",
+									"value": "/iot/json"
+								},
+								{
+									"key": "apikey",
+									"value": "987654321"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X DELETE \\\r\n  \"http://<IOT_AGENT_IP>:4041/iot/services?apikey=987654321\" \\\r\n  -H \"Fiware-Service: myservice\" \\\r\n  -H \"Fiware-ServicePath: /newEnvironment\" \\\r\n  -H \"Content-Type: application/json\" \\\r\n  -H \"resource: /iot/json\"\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Subscription by ID",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://165.232.124.98:1026/v2/subscriptions/68219fafe9e83f29930b0025"
+					},
+					"response": []
+				},
+				{
+					"name": "mass sub del",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Set the base URL for Orion\r",
+									"const orionUrl = \"http://<orion_host>:1026/v2/subscriptions\";\r",
+									"const fiwareService = \"myService\";\r",
+									"const fiwareServicePath = \"/newEnvironment\";\r",
+									"\r",
+									"// Fetch the subscriptions\r",
+									"pm.sendRequest({\r",
+									"    url: orionUrl,\r",
+									"    method: 'GET',\r",
+									"    headers: {\r",
+									"        'Fiware-Service': fiwareService,\r",
+									"        'Fiware-ServicePath': fiwareServicePath\r",
+									"    }\r",
+									"}, function (err, res) {\r",
+									"    if (err) {\r",
+									"        console.log(\"Error fetching subscriptions: \" + err);\r",
+									"        return;\r",
+									"    }\r",
+									"\r",
+									"    // If subscriptions are found, delete them one by one\r",
+									"    const subscriptions = res.json();\r",
+									"    if (subscriptions.length > 0) {\r",
+									"        subscriptions.forEach(function(subscription) {\r",
+									"            const subscriptionId = subscription.id;\r",
+									"\r",
+									"            // Create a new request for each subscription\r",
+									"            pm.collectionVariables.set(\"deleteSubscriptionId\", subscriptionId);\r",
+									"\r",
+									"            // Set up the delete request\r",
+									"            pm.sendRequest({\r",
+									"                url: `${orionUrl}/${subscriptionId}`,\r",
+									"                method: 'DELETE',\r",
+									"                headers: {\r",
+									"                    'Fiware-Service': fiwareService,\r",
+									"                    'Fiware-ServicePath': fiwareServicePath\r",
+									"                }\r",
+									"            }, function (err, res) {\r",
+									"                if (err) {\r",
+									"                    console.log(`Failed to delete subscription ${subscriptionId}: ` + err);\r",
+									"                } else {\r",
+									"                    console.log(`Successfully deleted subscription ${subscriptionId}`);\r",
+									"                }\r",
+									"            });\r",
+									"        });\r",
+									"    } else {\r",
+									"        console.log(\"No subscriptions found to delete.\");\r",
+									"    }\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": "http://{{IP}}:1026/v2/subscriptions"
+					},
+					"response": []
+				},
+				{
+					"name": "check type from quantiumleap",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://localhost:8668/v2/entities/TemperatureSensor:esp32-temperature-sensor/attrs/temperature",
+						"description": "Generated from cURL: curl -X GET 'http://localhost:8668/v2/entities/TemperatureSensor:esp32-temperature-sensor/attrs/temperature' \\\r\n  -H 'Fiware-Service: myService' \\\r\n  -H 'Fiware-ServicePath: /newEnvironment'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Orion entities Copy",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "fiware-service",
+								"value": "myService"
+							},
+							{
+								"key": "fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://{{ORION_EP}}/v2/entities",
+						"description": "Orion entities in Swarm"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Subscriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://165.232.124.98:1026/v2/subscriptions/"
+					},
+					"response": []
+				},
+				{
+					"name": "geting data from orion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"url": "http://{{IP}}:1026/v2/entities",
+						"description": "Generated from cURL: curl -X GET \"http://localhost:1026/v2/entities\" -H \"Fiware-Service: myService\" -H \"Fiware-ServicePath: /newEnvironment\"\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "check entetis quantiumleap",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://your-quantumleap-domain:8668/v2/entities",
+						"description": "Generated from cURL: curl http://your-quantumleap-domain:8668/v2/entities\n"
+					},
+					"response": []
+				},
+				{
+					"name": "manualy pusing data to quantium",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"data\": [\r\n    {\r\n      \"id\": \"TemperatureSensor:esp32-temperature-sensor\",\r\n      \"type\": \"TemperatureSensor\",\r\n      \"temperature\": {\r\n        \"type\": \"Number\",\r\n        \"value\": 23.5\r\n      },\r\n      \"humidity\": {\r\n        \"type\": \"Number\",\r\n        \"value\": 45.2\r\n      },\r\n      \"soundlevel\": {\r\n        \"type\": \"Number\",\r\n        \"value\": 3200\r\n      },\r\n      \"gas\": {\r\n        \"type\": \"Number\",\r\n        \"value\": 750\r\n      },\r\n      \"flame_distance\": {\r\n        \"type\": \"Number\",\r\n        \"value\": 3500\r\n      },\r\n      \"time_index\": \"2025-04-22T08:30:00.000000\"\r\n    }\r\n  ],\r\n  \"subscriptionId\": \"5947d174793fe6f7eb5e3961\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://{{IP}}:8668/v2/notify",
+						"description": "Generated from cURL: curl -X POST \"http://quantumleap:8668/v2/notify\" \\\r\n  -H \"Content-Type: application/json\" \\\r\n  -d '[\r\n        {\r\n          \"id\": \"TemperatureSensor:esp32-temperature-sensor\",\r\n          \"type\": \"TemperatureSensor\",\r\n          \"temperature\": {\"value\": 23.5, \"type\": \"Number\"},\r\n          \"humidity\": {\"value\": 45.2, \"type\": \"Number\"},\r\n          \"soundlevel\": {\"value\": 3200, \"type\": \"Number\"},\r\n          \"gas\": {\"value\": 750, \"type\": \"Number\"},\r\n          \"flame_distance\": {\"value\": 3500, \"type\": \"Number\"},\r\n          \"time_index\": \"2025-04-22T08:30:00.000000\"\r\n        }\r\n      ]'\r\n"
+					},
+					"response": []
+				},
+				{
+					"name": "create a group for the esp32",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"services\": [\r\n    {\r\n      \"apikey\": \"987654321\",\r\n      \"cbroker\": \"http://database.kokito741.xyz:1026\",\r\n      \"entity_type\": \"EnvironmentMonitor\",\r\n      \"resource\": \"/iot/json\",\r\n      \"type\": \"json\",\r\n      \"attributes\": [\r\n        { \"object_id\": \"temperature\", \"name\": \"temperature\", \"type\": \"Number\" },\r\n        { \"object_id\": \"humidity\", \"name\": \"humidity\", \"type\": \"Number\" },\r\n        { \"object_id\": \"soundlevel\", \"name\": \"soundlevel\", \"type\": \"Number\" },\r\n        { \"object_id\": \"uv_light\", \"name\": \"uv_light\", \"type\": \"Number\" },\r\n        { \"object_id\": \"uv_light_raw\", \"name\": \"uv_light_raw\", \"type\": \"Number\" },\r\n        { \"object_id\": \"ambient_light\", \"name\": \"ambient_light\", \"type\": \"Number\" },\r\n        { \"object_id\": \"ambient_light_raw\", \"name\": \"ambient_light_raw\", \"type\": \"Number\" },\r\n        { \"object_id\": \"battery_level\", \"name\": \"battery_level\", \"type\": \"Number\" },\r\n        { \"object_id\": \"battery_voltage\", \"name\": \"battery_voltage\", \"type\": \"Number\" },\r\n        { \"object_id\": \"wifi_signal\", \"name\": \"wifi_signal\", \"type\": \"Number\" },\r\n        { \"object_id\": \"sensor_errors\", \"name\": \"sensor_errors\", \"type\": \"StructuredValue\" }\r\n      ],\r\n      \"static_attributes\": [\r\n        { \"name\": \"category\", \"type\": \"Text\", \"value\": \"sensor\" },\r\n        { \"name\": \"deviceModel\", \"type\": \"Text\", \"value\": \"Adafruit ESP32-S3\" }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://{{IP}}:4041/iot/services",
+						"description": "Generated from cURL: curl -X POST \"http://localhost:4041/iot/services\" \\OST \"http://localhost:4041/iot/services\" \\\r\n-H \"Content-Type: application/json\" \\\r\n-H \"Fiware-Service: myService\" \\\r\n-H \"Fiware-ServicePath: /newEnvironment\" \\\r\n-d '{\r\n  \"services\": [\r\n    {\r\n      \"apikey\": \"987654321\",\r\n      \"cbroker\": \"http://fiware-orion:1026\",\r\n      \"entity_type\": \"TemperatureSensor\",\r\n      \"resource\": \"/iot/json\",\r\n      \"type\": \"json\"\r\n    }\r\n  ]\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "sending data to iot",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"temperature\": 23.4,\r\n    \"humidity\": 48.1,\r\n    \"soundlevel\": 691,\r\n    \"gas\": 660,\r\n    \"flame_distance\": 4095,\r\n    \"battery_level\": 97.3,\r\n    \"battery_voltage\": 4.18\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{IP}}:7896/iot/json?k=987654321&i=esp32-temperature-sensor",
+							"protocol": "http",
+							"host": [
+								"{{IP}}"
+							],
+							"port": "7896",
+							"path": [
+								"iot",
+								"json"
+							],
+							"query": [
+								{
+									"key": "k",
+									"value": "987654321"
+								},
+								{
+									"key": "i",
+									"value": "esp32-temperature-sensor"
+								},
+								{
+									"key": "keyValues ",
+									"value": null,
+									"disabled": true
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://localhost:7896/iot/json?k=987654321&i=esp32-temperature-sensor\" \\ \\\r\n-H \"Content-Type: application/json\" \\\r\n-H \"Fiware-Service: myService\" \\\r\n-H \"Fiware-ServicePath: /newEnvironment\" \\\r\n-d '{\r\n  \"temperature\": 22.5,\r\n  \"humidity\": 60.0,\r\n  \"soundlevel\": 45.0,\r\n  \"gas\": 0.2,\r\n  \"flame_distance\": 1.5\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "registering the device-optional",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"devices\": [\r\n    {\r\n      \"device_id\": \"esp32-monitoring-1\",\r\n      \"entity_name\": \"Device:esp32-monitoring-home\",\r\n      \"entity_type\": \"EnvironmentMonitor\",\r\n      \"protocol\": \"JSON\",\r\n      \"transport\": \"HTTP\",\r\n      \"timezone\": \"Europe/Sofia\",\r\n      \"attributes\": [\r\n        { \"object_id\": \"temperature\", \"name\": \"temperature\", \"type\": \"Number\" },\r\n        { \"object_id\": \"humidity\", \"name\": \"humidity\", \"type\": \"Number\" },\r\n        { \"object_id\": \"soundlevel\", \"name\": \"soundlevel\", \"type\": \"Number\" },\r\n        { \"object_id\": \"uv_light\", \"name\": \"uv_light\", \"type\": \"Number\" },\r\n        { \"object_id\": \"ambient_light\", \"name\": \"ambient_light\", \"type\": \"Number\" },\r\n        { \"object_id\": \"battery_level\", \"name\": \"battery_level\", \"type\": \"Number\" },\r\n        { \"object_id\": \"battery_voltage\", \"name\": \"battery_voltage\", \"type\": \"Number\" },\r\n        { \"object_id\": \"wifi_signal\", \"name\": \"wifi_signal\", \"type\": \"Number\" },\r\n        { \"object_id\": \"sensor_errors\", \"name\": \"sensor_errors\", \"type\": \"StructuredValue\" }\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{IP}}:4041/iot/devices?k=987654321",
+							"protocol": "http",
+							"host": [
+								"{{IP}}"
+							],
+							"port": "4041",
+							"path": [
+								"iot",
+								"devices"
+							],
+							"query": [
+								{
+									"key": "k",
+									"value": "987654321"
+								}
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://localhost:4041/iot/devices?k=987654321\" \\ \\\r\n-H \"Content-Type: application/json\" \\\r\n-H \"Fiware-Service: myService\" \\\r\n-H \"Fiware-ServicePath: /newEnvironment\" \\\r\n-d '{\r\n  \"devices\": [\r\n    {\r\n      \"device_id\": \"esp32-temperature-sensor\",\r\n      \"entity_name\": \"Device:esp32-temperature-sensor\",\r\n      \"entity_type\": \"TemperatureSensor\",\r\n      \"transport\": \"JSON\",\r\n      \"attributes\": [\r\n        { \"object_id\": \"temperature\", \"name\": \"temperature\", \"type\": \"float\" },\r\n        { \"object_id\": \"humidity\", \"name\": \"humidity\", \"type\": \"float\" },\r\n        { \"object_id\": \"soundlevel\", \"name\": \"soundlevel\", \"type\": \"float\" },\r\n        { \"object_id\": \"gas\", \"name\": \"gas\", \"type\": \"float\" },\r\n        { \"object_id\": \"flame_distance\", \"name\": \"flame_distance\", \"type\": \"float\" }\r\n      ]\r\n    }\r\n  ]\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Create subsciption for the esp",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Fiware-Service",
+								"value": "myService"
+							},
+							{
+								"key": "Fiware-ServicePath",
+								"value": "/newEnvironment"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"description\": \"Notify QuantumLeap on EnvironmentMonitor updates\",\r\n  \"subject\": {\r\n    \"entities\": [\r\n      {\r\n        \"id\": \"EnvironmentMonitor:esp32-monitoring-1\",\r\n        \"type\": \"EnvironmentMonitor\"\r\n      }\r\n    ],\r\n    \"condition\": {\r\n      \"attrs\": [\r\n        \"temperature\",\r\n        \"humidity\",\r\n        \"soundlevel\",\r\n        \"uv_light\",\r\n        \"uv_light_raw\",\r\n        \"ambient_light\",\r\n        \"ambient_light_raw\",\r\n        \"battery_level\",\r\n        \"battery_voltage\",\r\n        \"wifi_signal\",\r\n        \"sensor_errors\"\r\n      ]\r\n    }\r\n  },\r\n  \"notification\": {\r\n    \"http\": {\r\n      \"url\": \"http://quantumleap:8668/v2/notify\"\r\n    },\r\n    \"attrs\": [\r\n      \"temperature\",\r\n      \"humidity\",\r\n      \"soundlevel\",\r\n      \"uv_light\",\r\n      \"uv_light_raw\",\r\n      \"ambient_light\",\r\n      \"ambient_light_raw\",\r\n      \"battery_level\",\r\n      \"battery_voltage\",\r\n      \"wifi_signal\",\r\n      \"sensor_errors\"\r\n    ],\r\n    \"attrsFormat\": \"normalized\"\r\n  },\r\n  \"expires\": \"2040-01-01T14:00:00.00Z\",\r\n  \"throttling\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://165.232.124.98:1026/v2/subscriptions",
+						"description": "Generated from cURL: curl -X POST \"[http://165.232.124.98:1026/v2/subscriptions\"](http://165.232.124.98:1026/v2/subscriptions)  \n\\-H \"Content-Type: application/json\"  \n\\-H \"Fiware-Service: myService\"  \n\\-H \"Fiware-ServicePath: /newEnvironment\"  \n\\-d '{  \n\"description\": \"Temperature Sensor Subscription\",  \n\"subject\": {  \n\"entities\": \\[  \n{  \n\"id\": \"TemperatureSensor:esp32-temperature-sensor\",  \n\"type\": \"TemperatureSensor\"  \n}  \n\\],  \n\"condition\": {  \n\"attrs\": \\[\"temperature\", \"humidity\", \"soundlevel\", \"gas\", \"flame_distance\"\\]  \n}  \n},  \n\"notification\": {  \n\"http\": {  \n\"url\": \"[http://quantumleap:8668/v2/notify\"](http://quantumleap:8668/v2/notify\")  \n}  \n}  \n}'"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
