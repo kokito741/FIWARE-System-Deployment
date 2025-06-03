@@ -1,0 +1,10 @@
+                                
+cluster.name: crate-cluster
+security.enabled: true
+path:
+  data: /data
+auth:
+  internal:
+    enabled: true
+http:
+  enabled: true
